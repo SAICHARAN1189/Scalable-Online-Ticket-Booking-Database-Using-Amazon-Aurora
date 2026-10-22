@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Aurora Ticket Booking — A scalable online ticket booking platform powered by Amazon Aurora PostgreSQL with read/write endpoint routing.">
+    <title>Aurora Ticket Booking</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="#" class="nav-logo" onclick="navigateTo('home')">
+                <span class="logo-icon">⚡</span>
+                <span class="logo-text">Aurora<span class="logo-accent">Tickets</span></span>
+            </a>
+            <div class="nav-links">
+                <a href="#" class="nav-link active" data-page="home" onclick="navigateTo('home')">Events</a>
+                <a href="#" class="nav-link" data-page="bookings" onclick="navigateTo('bookings')">My Bookings</a>
+                <a href="#" class="nav-link" data-page="dashboard" onclick="navigateTo('dashboard')">Dashboard</a>
+            </div>
+            <div class="nav-indicator">
+                <span class="indicator-dot"></span>
+                <span class="indicator-text">Local DB</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content" id="main-content">
+
+        <!-- HOME PAGE -->
+        <section class="page" id="page-home">
+            <div class="hero-section">
+                <div class="hero-content">
+                    <h1 class="hero-title">
+                        Discover & Book
+                        <span class="gradient-text">Amazing Events</span>
+                    </h1>
+                    <p class="hero-subtitle">
+                        Powered by Amazon Aurora PostgreSQL — demonstrating scalable read/write endpoint routing
+                    </p>
+                </div>
+                <div class="hero-glow"></div>
+            </div>
+
+            <!-- Category Filter -->
+            <div class="filter-bar">
+                <button class="filter-btn active" data-category="all" onclick="filterEvents('all')">All Events</button>
+                <button class="filter-btn" data-category="Music" onclick="filterEvents('Music')">🎵 Music</button>
+                <button class="filter-btn" data-category="Sports" onclick="filterEvents('Sports')">🏏 Sports</button>
+                <button class="filter-btn" data-category="Comedy" onclick="filterEvents('Comedy')">😂 Comedy</button>
+                <button class="filter-btn" data-category="Conference" onclick="filterEvents('Conference')">🎤 Conference</button>
+                <button class="filter-btn" data-category="Exhibition" onclick="filterEvents('Exhibition')">🎨 Exhibition</button>
+            </div>
+
+            <!-- Events Grid -->
+            <div class="events-grid" id="events-grid">
+                <div class="loading-skeleton" id="events-loading">
+                    <div class="skeleton-card"></div>
+                    <div class="skeleton-card"></div>
+                    <div class="skeleton-card"></div>
+                    <div class="skeleton-card"></div>
+                    <div class="skeleton-card"></div>
+                    <div class="skeleton-card"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- EVENT DETAIL / BOOKING PAGE -->
+        <section class="page hidden" id="page-event-detail">
+            <div class="detail-container">
+                <button class="back-btn" onclick="navigateTo('home')">
+                    ← Back to Events
+                </button>
+                <div class="detail-card" id="event-detail-card">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- BOOKINGS PAGE -->
+        <section class="page hidden" id="page-bookings">
+            <div class="bookings-container">
+                <div class="section-header">
+                    <h2 class="section-title">My Bookings</h2>
+                    <p class="section-subtitle">View and manage your ticket bookings</p>
+                </div>
+                <div class="bookings-search">
+                    <div class="search-input-group">
+                        <input type="email" id="bookings-email" class="search-input"
+                               placeholder="Enter your email address" autocomplete="email">
+                        <button class="btn btn-primary" id="search-bookings-btn" onclick="searchBookings()">
+                            Search Bookings
+                        </button>
+                    </div>
+                </div>
+                <div class="bookings-list" id="bookings-list">
+                    <div class="empty-state">
+                        <span class="empty-icon">🎫</span>
+                        <p>Enter your email to view your bookings</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- DASHBOARD PAGE -->
+        <section class="page hidden" id="page-dashboard">
+            <div class="dashboard-container">
+                <div class="section-header">
+                    <h2 class="section-title">Database Activity Dashboard</h2>
+                    <p class="section-subtitle">
+                        Monitor read/write routing between Aurora writer and reader endpoints
+                    </p>
+                </div>
+
+                <!-- Config Info -->
+                <div class="config-banner" id="config-banner">
+                    <!-- Populated by JS -->
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="stats-grid" id="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">🎪</div>
+                        <div class="stat-value" id="stat-events">—</div>
+                        <div class="stat-label">Total Events</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🎫</div>
+                        <div class="stat-value" id="stat-bookings">—</div>
+                        <div class="stat-label">Active Bookings</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🎟️</div>
+                        <div class="stat-value" id="stat-tickets">—</div>
+                        <div class="stat-label">Tickets Sold</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">💰</div>
+                        <div class="stat-value" id="stat-revenue">—</div>
+                        <div class="stat-label">Total Revenue</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-value" id="stat-customers">—</div>
+                        <div class="stat-label">Customers</div>
+                    </div>
+                </div>
+
+                <!-- Endpoint Routing Summary -->
+                <div class="dashboard-section">
+                    <h3 class="dashboard-section-title">Endpoint Routing Summary</h3>
+                    <div class="routing-summary" id="routing-summary">
+                        <div class="loading-text">Loading...</div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="dashboard-section">
+                    <h3 class="dashboard-section-title">Recent Database Activity</h3>
+                    <div class="activity-table-container">
+                        <table class="activity-table" id="activity-table">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Operation</th>
+                                    <th>Endpoint</th>
+                                    <th>Query Type</th>
+                                    <th>Duration (ms)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="activity-tbody">
+                                <tr><td colspan="5" class="loading-text">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Load Test Results -->
+                <div class="dashboard-section">
+                    <h3 class="dashboard-section-title">Load Test Results</h3>
+                    <div class="load-test-upload">
+                        <label for="load-test-file" class="upload-label">
+                            📊 Upload load test results (JSON)
+                        </label>
+                        <input type="file" id="load-test-file" accept=".json" onchange="loadTestResults(this)">
+                    </div>
+                    <div id="load-test-results" class="load-test-display hidden">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Booking Modal -->
+    <div class="modal-overlay hidden" id="booking-modal">
+        <div class="modal-card">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <h3 class="modal-title">Book Tickets</h3>
+            <div class="modal-event-info" id="modal-event-info"></div>
+            <form id="booking-form" onsubmit="submitBooking(event)">
+                <div class="form-group">
+                    <label for="book-name">Full Name *</label>
+                    <input type="text" id="book-name" required placeholder="Enter your full name" autocomplete="name">
+                    <span class="field-error" id="error-name"></span>
+                </div>
+                <div class="form-group">
+                    <label for="book-email">Email *</label>
+                    <input type="email" id="book-email" required placeholder="your@email.com" autocomplete="email">
+                    <span class="field-error" id="error-email"></span>
+                </div>
+                <div class="form-group">
+                    <label for="book-phone">Phone</label>
+                    <input type="tel" id="book-phone" placeholder="+91-XXXXXXXXXX" autocomplete="tel">
+                </div>
+                <div class="form-group">
+                    <label for="book-qty">Number of Tickets *</label>
+                    <input type="number" id="book-qty" min="1" max="10" value="1" required>
+                    <span class="field-error" id="error-qty"></span>
+                </div>
+                <div class="form-group total-display">
+                    <span>Total Price:</span>
+                    <span class="total-price" id="total-price">₹0.00</span>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="submit-booking-btn">
+                        <span class="btn-text">Confirm Booking</span>
+                        <span class="btn-spinner hidden"></span>
+                    </button>
+                </div>
+                <div class="form-message hidden" id="booking-message"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
